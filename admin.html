@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add Order</title>
+  </head>
+  <body>
+    <h2>Add New Order</h2>
+
+    <input id="name" placeholder="Customer Name" /><br /><br />
+    <input id="phone" placeholder="Phone Number" /><br /><br />
+    <input id="item" placeholder="Item Ordered" /><br /><br />
+    <input id="quantity" type="number" placeholder="Quantity" /><br /><br />
+
+    <button onclick="addOrder()">Add Order</button>
+
+    <p id="message"></p>
+
+    <!-- Firebase COMPAT SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // Your Firebase config
+      const firebaseConfig = {
+        apiKey: "AIzaSyDlcwFnHnBb9bRv5xoUEb-2sTSjQcyz84E",
+        authDomain: "order-tracker-51471.firebaseapp.com",
+        projectId: "order-tracker-51471",
+        storageBucket: "order-tracker-51471.firebasestorage.app",
+        messagingSenderId: "761684041108",
+        appId: "1:761684041108:web:5625e43759ed00951a0381",
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      // Firestore reference
+      const db = firebase.firestore();
+
+      function addOrder() {
+        db.collection("orders")
+          .add({
+            name: document.getElementById("name").value,
+            phone: document.getElementById("phone").value,
+            item: document.getElementById("item").value,
+            quantity: Number(document.getElementById("quantity").value),
+            status: "Pending",
+            createdAt: new Date(),
+          })
+          .then(() => {
+            document.getElementById("message").textContent =
+              "✅ Order added successfully";
+          })
+          .catch((err) => {
+            console.error(err);
+            document.getElementById("message").textContent = err.message;
+          });
+      }
+    </script>
+  </body>
+</html>
