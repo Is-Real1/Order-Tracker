@@ -3,15 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <title>Add Order</title>
+    <link rel="stylesheet" href="index.css" />
   </head>
   <body>
     <h2>Add New Order</h2>
-
     <input id="name" placeholder="Customer Name" /><br /><br />
     <input id="phone" placeholder="Phone Number" /><br /><br />
-    <input id="item" placeholder="Item Ordered" /><br /><br />
-    <input id="quantity" type="number" placeholder="Quantity" /><br /><br />
+    <div id="items">
+      <div class="item-row">
+        <input
+          class="item-name"
+          type="text"
+          placeholder="Item Name"
+        /><br /><br />
+        <input
+          class="item-qty"
+          type="number"
+          placeholder="Quantity"
+          min="1"
+        /><br /><br />
+      </div>
+    </div>
 
+    <button type="button" onclick="addItem()">➕ add another Item</button>
     <button onclick="addOrder()">Add Order</button>
 
     <p id="message"></p>
@@ -37,24 +51,55 @@
       // Firestore reference
       const db = firebase.firestore();
 
-      function addOrder() {
+      //wrote this to make sure we can recieve more than one order from one customer
+      function addOrder(e) {
+        // e.preventDefault();
+        const itemNames = document.querySelectorAll(".item-name");
+        const itemQtys = document.querySelectorAll(".item-qty");
+
+        const items = [];
+
+        itemNames.forEach((input, index) => {
+          const name = input.value.trim();
+          const qty = Number(itemQtys[index].value);
+
+          if (name && qty > 0) {
+            items.push({ name, qty });
+          }
+        });
+        const orderId = "ORD-" + Date.now().toString().slice(-6);
+
         db.collection("orders")
           .add({
+            orderId: orderId,
             name: document.getElementById("name").value,
             phone: document.getElementById("phone").value,
-            item: document.getElementById("item").value,
-            quantity: Number(document.getElementById("quantity").value),
+            // item: document.getElementById("item").value,
+            // quantity: Number(document.getElementById("quantity").value),
+            items: items,
             status: "Pending",
             createdAt: new Date(),
           })
           .then(() => {
-            document.getElementById("message").textContent =
-              "✅ Order added successfully";
+            document.getElementById("message").innerHTML =
+              "✅ Order added <br><strong>Order ID:</strong>" + orderId;
           })
           .catch((err) => {
             console.error(err);
             document.getElementById("message").textContent = err.message;
           });
+      }
+
+      function addItem() {
+        const itemsDiv = document.getElementById("items");
+        const row = document.createElement("div");
+        row.className = "item-row";
+        row.innerHTML = `
+        <input class ="item-name" placeholder = "Item Name">
+        <input class ="item-qty" type ="number" placeholder = "Quantity">
+        `;
+
+        itemsDiv.appendChild(row);
       }
     </script>
   </body>
