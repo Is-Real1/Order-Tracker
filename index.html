@@ -3,42 +3,71 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Track Your Order</title>
-
-    <script src="js/trackOrder.js"></script>
-
+    <title>Add Order</title>
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
     <div class="container page">
       <div class="header">
-        <h1>Track Your Order</h1>
-        <div class="subtle">Enter an Order ID (e.g., ORD-123456) or phone number</div>
+        <h1>Add / Update Order</h1>
+        <div class="subtle">Create a new order or edit an existing one</div>
       </div>
 
       <div class="card section">
-        <div class="search">
-          <input id="search" placeholder="Enter Order ID or phone number" />
-          <button onclick="trackOrder()">Check Order</button>
+        <div class="form-grid">
+          <div>
+            <label for="name">Customer Name</label>
+            <input id="name" placeholder="Customer Name" />
+          </div>
+          <div>
+            <label for="phone">Phone Number</label>
+            <input id="phone" placeholder="Phone Number" />
+          </div>
         </div>
-        <div id="result" class="mt-16"></div>
+
+        <div class="section">
+          <label>Items</label>
+          <div id="items">
+            <div class="item-row">
+              <input class="item-name" type="text" placeholder="Item Name" />
+              <input class="item-qty" type="number" placeholder="Quantity" min="1" />
+              <input class="item-desc" type="text" placeholder="Description (optional)" />
+            </div>
+          </div>
+          <div class="mt-16">
+            <button type="button" class="ghost mr-8" onclick="addItem()">➕ Add another item</button>
+            <button id="submitBtn" onclick="addOrder()">Add Order</button>
+                      </div>
+          <p id="message" class="message mt-16"></p>
+        </div>
       </div>
     </div>
 
-    <!-- Firebase compat SDK -->
+    <!-- Firebase COMPAT SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-    <script src="js/trackOrder.js"></script>
 
     <script>
+      // Your Firebase config
       const firebaseConfig = {
         apiKey: "AIzaSyDlcwFnHnBb9bRv5xoUEb-2sTSjQcyz84E",
         authDomain: "order-tracker-51471.firebaseapp.com",
         projectId: "order-tracker-51471",
+        storageBucket: "order-tracker-51471.firebasestorage.app",
+        messagingSenderId: "761684041108",
+        appId: "1:761684041108:web:5625e43759ed00951a0381",
       };
 
+      // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
+
+      // Firestore reference
       const db = firebase.firestore();
+      // Expose for downstream scripts
+      window.db = db;
     </script>
-  </body>
+
+    <script src="js/addorder.js"></script>
+    <script src="js/addItem.js"></script>
+      </body>
 </html>

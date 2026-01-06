@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Track Your Order</title>
+
+    <script src="js/trackOrder.js"></script>
+
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div class="container page">
+      <div class="header">
+        <h1>Track Your Order</h1>
+        <div class="subtle">Enter an Order ID (e.g., ORD-123456) or phone number</div>
+      </div>
+
+      <div class="card section">
+        <div class="search">
+          <input id="search" placeholder="Enter Order ID or phone number" />
+          <button onclick="trackOrder()">Check Order</button>
+        </div>
+        <div id="result" class="mt-16"></div>
+      </div>
+    </div>
+
+    <!-- Firebase compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="js/trackOrder.js"></script>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyDlcwFnHnBb9bRv5xoUEb-2sTSjQcyz84E",
+        authDomain: "order-tracker-51471.firebaseapp.com",
+        projectId: "order-tracker-51471",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
+  </body>
+</html>
