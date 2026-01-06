@@ -2,65 +2,33 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Track Your Order</title>
-    <!-- <style> -->
-    <!-- /* body {
-        font-family: Arial, sans-serif;
-        max-width: 400px;
-        margin: 40px auto;
-      }
 
-      .container {
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-      }
-
-      h2 {
-        text-align: center;
-      }
-
-      input,
-      button {
-        width: 100%;
-        padding: 10px;
-        margin-top: 10px;
-      }
-
-      button {
-        background: #4f46e5;
-        color: white;
-      }
-
-      button:hover {
-        opacity: 0.9;
-      }
-
-      select {
-        padding: 6px;
-      }
-      .result {
-        margin-top: 20px;
-        padding: 10px;
-        border: 1px solid #ccc;
-      } -->
-    <!-- </style> */ -->
+    <script src="js/trackOrder.js"></script>
 
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <div>
-      <h2>Track Your Order</h2>
+    <div class="container page">
+      <div class="header">
+        <h1>Track Your Order</h1>
+        <div class="subtle">Enter an Order ID (e.g., ORD-123456) or phone number</div>
+      </div>
 
-      <input id="search" placeholder="Enter Order ID or phone number" />
-      <button onclick="trackOrder()">Check Order</button>
-
-      <div id="result"></div>
+      <div class="card section">
+        <div class="search">
+          <input id="search" placeholder="Enter Order ID or phone number" />
+          <button onclick="trackOrder()">Check Order</button>
+        </div>
+        <div id="result" class="mt-16"></div>
+      </div>
     </div>
+
     <!-- Firebase compat SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="js/trackOrder.js"></script>
 
     <script>
       const firebaseConfig = {
@@ -71,61 +39,6 @@
 
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
-
-      function trackOrder() {
-        const value = document.getElementById("search").value.trim();
-        const resultDiv = document.getElementById("result");
-        resultDiv.innerHTML = "Checking...";
-
-        if (!value) {
-          resultDiv.innerHTML = "⚠ Please enter Order ID or Phone Number";
-          return;
-        }
-
-        resultDiv.innerHTML = "Checking...";
-
-        let queryRef;
-
-        // Detect Order ID (starts with ORD-)
-        if (value.toUpperCase().startsWith("ORD-")) {
-          queryRef = db
-            .collection("orders")
-            .where("orderId", "==", value.toUpperCase());
-        } else {
-          // Otherwise treat as phone number
-          queryRef = db.collection("orders").where("phone", "==", value);
-        }
-
-        queryRef
-          .get()
-          .then((snapshot) => {
-            if (snapshot.empty) {
-              resultDiv.innerHTML = "❌ No order found";
-              return;
-            }
-
-            resultDiv.innerHTML = "";
-
-            snapshot.forEach((doc) => {
-              const data = doc.data();
-              // Item Display
-              const itemsHtml = data.items
-                .map((i) => `<li>${i.name} * ${i.qty}</li>`)
-                .join("");
-              resultDiv.innerHTML += `
-              <div class="result">
-                <p><strong>Order ID:</strong>${data.orderId}</p>
-                <p><strong>Item:</strong> ${data.item}</p>
-                <p><strong>Quantity:</strong> ${data.quantity}</p>
-                <p><strong>Status:</strong> ${data.status}</p>
-              </div>
-            `;
-            });
-          })
-          .catch((err) => {
-            resultDiv.innerHTML = err.message;
-          });
-      }
     </script>
   </body>
 </html>

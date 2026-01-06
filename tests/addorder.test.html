@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>addorder.js tests</title>
+    <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <div id="mocha-fixtures" style="display:none;"></div>
+
+    <script src="https://unpkg.com/mocha/mocha.js"></script>
+    <script src="https://unpkg.com/chai/chai.js"></script>
+    <script>
+      mocha.setup('bdd');
+      const { expect } = chai;
+
+      function createSandboxPage({ query = '', getResponse, getShouldReject = false }) {
+        return new Promise((resolve, reject) => {
+          const iframe = document.createElement('iframe');
+          // Large sandbox for running app code
+          iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+          document.body.appendChild(iframe);
+
+          const doc = iframe.contentDocument;
+          const win = iframe.contentWindow;
+
+          // Helper to serialize a function body so it can be inserted inline
+          function serializeFn(fn) {
+            return '(' + fn.toString() + ')();';
+          }
+
+          // Build minimal HTML for the iframe
+          const html = `<!doctype html>
+            <html><head><meta charset="utf-8"><title>sandbox</title></head>
+            <body>
+              <input id="name" />
+              <input id="phone" />
+              <div id="items"></div>
+              <button id="submitBtn">Add Order</button>
+              <div id="message"></div>
+              <div id="itemsContainer"></div>
+
+              <script>
+                // Simulate location with desired query
+                try { history.replaceState(null, '', '${query}'); } catch (e) {}
+
+                // Mocks
+                window.__calls__ = { collection: [], add: [], update: [], get: [], alerts: [], consoleErrors: [] };
+                window.alert = (msg) => window.__calls__.alerts.push(String(msg));
+                const originalError = console.error;
+                console.error = function(){ window.__calls__.consoleErrors.push(Array.from(arguments).map(String).join(' ')); };
+
+                // Deterministic Date.now
+                const FIXED_NOW = 1736035200000; // 2025-01-05T00:00:00.000Z
+                Date.now = () => FIXED_NOW;
+
+                // Very small Firestore-like mock
+                function makeDocSnap(data){ return { data: () => data }; }
+                const mockDb = {
+                  collection(name){
+                    window.__calls__.collection.push(name);
+                    return {
+                      add(payload){ window.__calls__.add.push(payload); return Promise.resolve({ id: 'fake-id' }); },
+                      doc(id){
+                        return {
+                          update(payload){ window.__calls__.update.push({ id, payload }); return Promise.resolve(); },
+                          get(){ window.__calls__.get.push(id); return ${getShouldReject ? 'Promise.reject(new Error("boom"))' : 'Promise.resolve(makeDocSnap(getResponse || {}))'}; }
+                        };
+                      }
+                    };
+                  }
+                };
+                window.db = mockDb;
+              <\/script>
+
+              <script src="../js/addorder.js"><\/script>
+            </body></html>`;
+
+          doc.open();
+          doc.write(html);
+          doc.close();
+
+          // Wait for the script to load
+          setTimeout(() => resolve({ iframe, win, doc }), 20);
+        });
+      }
+
+      function cleanupIframe(iframe) {
+        if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      }
+
+      describe('addorder.js', function() {
+        this.timeout(5000);
+
+        it('Should alert and not hit db when required fields or items are missing', async function() {
+          const { iframe, win } = await createSandboxPage({ query: '' });
+          try {
+            // No items present and empty fields by default
+            expect(typeof win.addOrder).to.equal('function');
+            win.addOrder();
+
+            expect(win.__calls__.alerts).to.deep.equal(['Please fill all required fields']);
+            expect(win.__calls__.add.length).to.equal(0);
+            expect(win.__calls__.update.length).to.equal(0);
+          } finally { cleanupIframe(iframe); }
+        });
+
+        it('Should add a new order with filtered items and set success message', async function() {
+          const { iframe, win, doc } = await createSandboxPage({ query: '' });
+          try {
+            // Prepare DOM inputs
+            doc.getElementById('name').value = 'Alice';
+            doc.getElementById('phone').value = '12345';
+
+            // Create three item rows (one invalid)
+            const container = doc.getElementById('itemsContainer');
+            function addRow(n, q){
+              const row = doc.createElement('div');
+              row.className = 'item-row';
+              row.innerHTML = '<input class="item-name"/><input class="item-qty" type="number" />';
+              container.appendChild(row);
+              row.querySelector('.item-name').value = n;
+              row.querySelector('.item-qty').value = q;
+            }
+            addRow('Widget', '2');
+            addRow('', '5'); // invalid: empty name
+            addRow('Gadget', '0'); // invalid: qty 0
+
+            await win.addOrder();
+
+            // Verify add called once with correct payload
+            expect(win.__calls__.add.length).to.equal(1);
+            const payload = win.__calls__.add[0];
+            expect(payload.name).to.equal('Alice');
+            expect(payload.phone).to.equal('12345');
+            expect(payload.status).to.equal('Pending');
+            expect(payload.items).to.deep.equal([{ name: 'Widget', qty: 2 }]);
+            expect(payload.createdAt).to.be.instanceOf(win.Date);
+
+            // Order ID format and message update
+            expect(payload.orderId).to.match(/^ORD-\d{6}$/);
+            expect(doc.getElementById('message').innerHTML).to.match(/Order ID:/);
+          } finally { cleanupIframe(iframe); }
+        });
+
+        it('Should update existing order when currentEditId is set', async function() {
+          const { iframe, win, doc } = await createSandboxPage({ query: '' });
+          try {
+            // Prepare DOM inputs and items
+            doc.getElementById('name').value = 'Bob';
+            doc.getElementById('phone').value = '555-1111';
+
+            const container = doc.getElementById('itemsContainer');
+            const row = doc.createElement('div');
+            row.className = 'item-row';
+            row.innerHTML = '<input class="item-name"/><input class="item-qty" type="number" />';
+            container.appendChild(row);
+            row.querySelector('.item-name').value = 'Sprocket';
+            row.querySelector('.item-qty').value = '3';
+
+            // Simulate edit mode
+            win.currentEditId = 'abc123';
+
+            await win.addOrder();
+
+            expect(win.__calls__.update.length).to.equal(1);
+            const upd = win.__calls__.update[0];
+            expect(upd.id).to.equal('abc123');
+            expect(upd.payload).to.deep.include({ name: 'Bob', phone: '555-1111' });
+            expect(upd.payload.items).to.deep.equal([{ name: 'Sprocket', qty: 3 }]);
+
+            // UI reset effects
+            expect(win.currentEditId).to.equal(null);
+            expect(doc.getElementById('submitBtn').innerText).to.equal('Add Order');
+            expect(doc.getElementById('message').innerHTML).to.match(/Order updated successfully/);
+          } finally { cleanupIframe(iframe); }
+        });
+
+        it('Should prefill form when editId is present in URL', async function() {
+          const fakeData = { name: 'Carol', phone: '999', items: [{ name: 'Bolt', qty: 4 }] };
+          const { iframe, win, doc } = await createSandboxPage({ query: '?editId=xyz', getResponse: fakeData });
+          try {
+            // Wait a tick for the async get to resolve
+            await new Promise(r => setTimeout(r, 30));
+
+            expect(doc.getElementById('name').value).to.equal('Carol');
+            expect(doc.getElementById('phone').value).to.equal('999');
+            const container = doc.getElementById('itemsContainer');
+            expect(container.children.length).to.equal(1);
+            expect(container.querySelector('.item-name').value).to.equal('Bolt');
+            expect(container.querySelector('.item-qty').value).to.equal('4');
+            expect(doc.getElementById('submitBtn').innerText).to.equal('Update Order');
+          } finally { cleanupIframe(iframe); }
+        });
+
+        it('Should handle prefill fetch error without crashing', async function() {
+          const { iframe, win, doc } = await createSandboxPage({ query: '?editId=oops', getShouldReject: true });
+          try {
+            await new Promise(r => setTimeout(r, 30));
+            // Ensure no values set and error logged
+            expect(doc.getElementById('name').value).to.equal('');
+            expect(doc.getElementById('phone').value).to.equal('');
+            expect(win.__calls__.consoleErrors.length).to.be.greaterThan(0);
+          } finally { cleanupIframe(iframe); }
+        });
+      });
+
+      mocha.run();
+    </script>
+  </body>
+</html>

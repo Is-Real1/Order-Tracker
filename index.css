@@ -1,41 +1,184 @@
+/* Minimalist UI Theme */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --text: #0F172A;
+  --text-muted: #475569;
+  --border: #E2E8F0;
+  --primary: #2563EB;
+  --primary-600: #1D4ED8;
+  --success: #16A34A;
+  --warning: #CA8A04;
+  --danger: #DC2626;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
 body {
-  font-family: Arial, sans-serif;
-  max-width: 400px;
-  margin: 40px auto;
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  background: linear-gradient(180deg, #FAFBFF 0%, var(--bg) 100%);
 }
 
 .container {
-  background: #fff;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.header h1 { margin: 0; font-weight: 700; font-size: 24px; }
+.header .subtle { color: var(--text-muted); font-weight: 500; font-size: 14px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
-h2 {
-  text-align: center;
-}
+.section { margin-top: 24px; }
 
-input,
-button {
+label { display: inline-block; margin-bottom: 6px; font-weight: 600; }
+input[type="text"], input[type="number"], input[type="email"], input[type="password"], input:not([type]), select {
   width: 100%;
-  padding: 10px;
-  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  color: var(--text);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+input:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 button {
-  background: #4f46e5;
-  color: white;
+  appearance: none;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .02s ease, box-shadow .15s ease;
+}
+button:hover { background: var(--primary-600); border-color: var(--primary-600); box-shadow: 0 6px 18px rgba(37,99,235,0.2); }
+button:active { transform: translateY(1px); }
+button.ghost { background: transparent; color: var(--primary); border-color: var(--primary); }
+button.ghost:hover { background: rgba(37, 99, 235, 0.08); }
+
+.row { display: flex; gap: 12px; }
+.row > * { flex: 1; }
+
+.item-row { display: flex; gap: 12px; margin-bottom: 10px; }
+.item-row input { flex: 1; }
+
+.message {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+.message.success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+.message.warn { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+.message.error { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+
+.table-card { overflow: hidden; }
+.table-wrapper { overflow: auto; border-radius: 12px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; }
+thead th { position: sticky; top: 0; background: #F1F5F9; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: .04em; }
+th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+tbody tr:nth-child(odd) { background: #FCFCFD; }
+
+.status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+}
+.status.Pending { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+.status.Processing { background: #DBEAFE; color: #1E40AF; border-color: #BFDBFE; }
+.status.Ready { background: #E0E7FF; color: #3730A3; border-color: #C7D2FE; }
+.status.Delivered { background: #DCFCE7; color: #166534; border-color: #BBF7D0; }
+
+.actions { display: flex; gap: 8px; align-items: center; }
+
+.headerbar {
+  background: #FFFFFFAA;
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border);
 }
 
-button:hover {
-  opacity: 0.9;
-}
+.center { display: flex; align-items: center; justify-content: center; }
+.small { font-size: 14px; color: var(--text-muted); }
 
-select {
-  padding: 6px;
-}
-.result {
-  margin-top: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
+/* Page-specific helpers */
+.page { padding-top: 24px; }
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 720px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+
+select { padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: #fff; }
+
+/* Links */
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+/* Utility */
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mt-32 { margin-top: 32px; }
+.mr-8 { margin-right: 8px; }
+.flex { display: flex; }
+.gap-8 { gap: 8px; }
+.justify-between { justify-content: space-between; }
+.align-center { align-items: center; }
+
+/* Search / Track UI */
+.search { display: flex; gap: 8px; }
+.search input { flex: 1; }
+
+/* Result visual */
+.result { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: #fff; box-shadow: var(--shadow); }
+
+/* Subtle animations and motion (respects reduced-motion) */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .header h1 { animation: fadeIn .35s ease-out both; }
+  .card, .table-card { animation: fadeInUp .35s ease-out both; }
+  .result { animation: fadeInUp .3s ease-out both; }
+  .message { animation: fadeIn .25s ease-out both; }
+
+  /* Interactive micro-interactions */
+  button:hover { transform: translateY(-1px); }
+  tbody tr { transition: background-color .18s ease; }
+  tbody tr:hover { background-color: #F5F7FF; }
+
+  input, select { transition: border-color .15s ease, box-shadow .15s ease, background-color .2s ease; }
 }

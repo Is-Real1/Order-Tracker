@@ -2,33 +2,46 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Add Order</title>
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <h2>Add New Order</h2>
-    <input id="name" placeholder="Customer Name" /><br /><br />
-    <input id="phone" placeholder="Phone Number" /><br /><br />
-    <div id="items">
-      <div class="item-row">
-        <input
-          class="item-name"
-          type="text"
-          placeholder="Item Name"
-        /><br /><br />
-        <input
-          class="item-qty"
-          type="number"
-          placeholder="Quantity"
-          min="1"
-        /><br /><br />
+    <div class="container page">
+      <div class="header">
+        <h1>Add / Update Order</h1>
+        <div class="subtle">Create a new order or edit an existing one</div>
+      </div>
+
+      <div class="card section">
+        <div class="form-grid">
+          <div>
+            <label for="name">Customer Name</label>
+            <input id="name" placeholder="Customer Name" />
+          </div>
+          <div>
+            <label for="phone">Phone Number</label>
+            <input id="phone" placeholder="Phone Number" />
+          </div>
+        </div>
+
+        <div class="section">
+          <label>Items</label>
+          <div id="items">
+            <div class="item-row">
+              <input class="item-name" type="text" placeholder="Item Name" />
+              <input class="item-qty" type="number" placeholder="Quantity" min="1" />
+              <input class="item-desc" type="text" placeholder="Description (optional)" />
+            </div>
+          </div>
+          <div class="mt-16">
+            <button type="button" class="ghost mr-8" onclick="addItem()">➕ Add another item</button>
+            <button id="submitBtn" onclick="addOrder()">Add Order</button>
+                      </div>
+          <p id="message" class="message mt-16"></p>
+        </div>
       </div>
     </div>
-
-    <button type="button" onclick="addItem()">➕ add another Item</button>
-    <button onclick="addOrder()">Add Order</button>
-
-    <p id="message"></p>
 
     <!-- Firebase COMPAT SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
@@ -50,57 +63,11 @@
 
       // Firestore reference
       const db = firebase.firestore();
-
-      //wrote this to make sure we can recieve more than one order from one customer
-      function addOrder(e) {
-        // e.preventDefault();
-        const itemNames = document.querySelectorAll(".item-name");
-        const itemQtys = document.querySelectorAll(".item-qty");
-
-        const items = [];
-
-        itemNames.forEach((input, index) => {
-          const name = input.value.trim();
-          const qty = Number(itemQtys[index].value);
-
-          if (name && qty > 0) {
-            items.push({ name, qty });
-          }
-        });
-        const orderId = "ORD-" + Date.now().toString().slice(-6);
-
-        db.collection("orders")
-          .add({
-            orderId: orderId,
-            name: document.getElementById("name").value,
-            phone: document.getElementById("phone").value,
-            // item: document.getElementById("item").value,
-            // quantity: Number(document.getElementById("quantity").value),
-            items: items,
-            status: "Pending",
-            createdAt: new Date(),
-          })
-          .then(() => {
-            document.getElementById("message").innerHTML =
-              "✅ Order added <br><strong>Order ID:</strong>" + orderId;
-          })
-          .catch((err) => {
-            console.error(err);
-            document.getElementById("message").textContent = err.message;
-          });
-      }
-
-      function addItem() {
-        const itemsDiv = document.getElementById("items");
-        const row = document.createElement("div");
-        row.className = "item-row";
-        row.innerHTML = `
-        <input class ="item-name" placeholder = "Item Name">
-        <input class ="item-qty" type ="number" placeholder = "Quantity">
-        `;
-
-        itemsDiv.appendChild(row);
-      }
+      // Expose for downstream scripts
+      window.db = db;
     </script>
-  </body>
+
+    <script src="js/addorder.js"></script>
+    <script src="js/addItem.js"></script>
+      </body>
 </html>
