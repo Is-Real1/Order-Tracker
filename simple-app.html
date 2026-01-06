@@ -1,167 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Order Tracker — Simple App</title>
-  <link rel="stylesheet" href="index.css" />
-  <!-- Firebase compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-</head>
-<body>
-  <div class="container page">
-    <div class="header">
-      <h1>Order Tracker</h1>
-      <div class="subtle">Simple app • Online with database</div>
-    </div>
-
-    <div class="card section">
-      <div class="actions">
-        <button id="tabTrackBtn" class="mr-8">Track</button>
-        <button id="tabAddBtn" class="mr-8">Add / Update</button>
-        <button id="tabOrdersBtn">Orders</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Order Tracker — Simple App</title>
+    <link rel="stylesheet" href="index.css" />
+    <!-- Firebase compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  </head>
+  <body>
+    <div class="container page">
+      <div class="header">
+        <h1>Order Tracker</h1>
+        <div class="subtle">Simple app • Online with database</div>
       </div>
-    </div>
 
-    <!-- Track View -->
-    <section id="viewTrack" class="card section" style="display: none;">
-      <h2 style="margin-top:0;">Track Order</h2>
-      <div class="search">
-        <input id="trackSearch" placeholder="Enter Order ID (e.g., ORD-123456) or phone number" />
-        <button id="trackBtn">Check</button>
-        <button id="trackShareBtn" class="ghost">Share Link</button>
-      </div>
-      <div id="trackResult" class="mt-16"></div>
-    </section>
-
-    <!-- Add / Update View -->
-    <section id="viewAdd" class="card section" style="display: none;">
-      <h2 style="margin-top:0;">Add / Update Order</h2>
-      <div class="form-grid">
-        <div>
-          <label for="nameInput">Customer Name</label>
-          <input id="nameInput" placeholder="Customer Name" />
-        </div>
-        <div>
-          <label for="phoneInput">Phone Number</label>
-          <input id="phoneInput" placeholder="Phone Number" />
+      <div class="card section">
+        <div class="actions">
+          <button id="tabTrackBtn" class="mr-8">Track</button>
+          <button id="tabAddBtn" class="mr-8">Add / Update</button>
+          <button id="tabOrdersBtn">Orders</button>
         </div>
       </div>
 
-      <div class="section">
-        <label>Items</label>
-        <div id="itemsContainer">
-          <div class="item-row">
-            <input class="item-name" type="text" placeholder="Item Name" />
-            <input class="item-qty" type="number" placeholder="Quantity" min="1" />
-            <input class="item-desc" type="text" placeholder="Description (optional)" />
+      <!-- Track View -->
+      <section id="viewTrack" class="card section" style="display: none">
+        <h2 style="margin-top: 0">Track Order</h2>
+        <div class="search">
+          <input
+            id="trackSearch"
+            placeholder="Enter Order ID (e.g., ORD-123456) or phone number"
+          />
+          <button id="trackBtn">Check</button>
+          <button id="trackShareBtn" class="ghost">Share Link</button>
+        </div>
+        <div id="trackResult" class="mt-16"></div>
+      </section>
+
+      <!-- Add / Update View -->
+      <section id="viewAdd" class="card section" style="display: none">
+        <h2 style="margin-top: 0">Add / Update Order</h2>
+        <div class="form-grid">
+          <div>
+            <label for="nameInput">Customer Name</label>
+            <input id="nameInput" placeholder="Customer Name" />
+          </div>
+          <div>
+            <label for="phoneInput">Phone Number</label>
+            <input id="phoneInput" placeholder="Phone Number" />
           </div>
         </div>
-        <div class="mt-16">
-          <button type="button" id="addItemBtn" class="ghost mr-8">➕ Add another item</button>
-          <button id="submitBtn">Add Order</button>
+
+        <div class="section">
+          <label>Items</label>
+          <div id="itemsContainer">
+            <div class="item-row">
+              <input class="item-name" type="text" placeholder="Item Name" />
+              <input
+                class="item-qty"
+                type="number"
+                placeholder="Quantity"
+                min="1"
+              />
+              <input
+                class="item-desc"
+                type="text"
+                placeholder="Description (optional)"
+              />
+            </div>
+          </div>
+          <div class="mt-16">
+            <button type="button" id="addItemBtn" class="ghost mr-8">
+              ➕ Add another item
+            </button>
+            <button id="submitBtn">Add Order</button>
+          </div>
+          <div id="formMsg" class="message mt-16" style="display: none"></div>
         </div>
-        <div id="formMsg" class="message mt-16" style="display:none;"></div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Orders View -->
-    <section id="viewOrders" class="card table-card section" style="display: none;">
-      <div class="justify-between align-center flex" style="margin-bottom: 12px;">
-        <h2 style="margin:0;">Orders</h2>
-        <div class="small">Live updates</div>
-      </div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Items</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTable"></tbody>
-        </table>
-      </div>
-    </section>
-  </div>
+      <!-- Orders View -->
+      <section
+        id="viewOrders"
+        class="card table-card section"
+        style="display: none"
+      >
+        <div
+          class="justify-between align-center flex"
+          style="margin-bottom: 12px"
+        >
+          <h2 style="margin: 0">Orders</h2>
+          <div class="small">Live updates</div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Items</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
 
-  <script>
-    // Firebase configuration (same project as existing app)
-    const firebaseConfig = {
-      apiKey: "AIzaSyDlcwFnHnBb9bRv5xoUEb-2sTSjQcyz84E",
-      authDomain: "order-tracker-51471.firebaseapp.com",
-      projectId: "order-tracker-51471",
-      storageBucket: "order-tracker-51471.firebasestorage.app",
-      messagingSenderId: "761684041108",
-      appId: "1:761684041108:web:5625e43759ed00951a0381",
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    <script>
+      // Firebase configuration (same project as existing app)
+      const firebaseConfig = {
+        apiKey: "AIzaSyDlcwFnHnBb9bRv5xoUEb-2sTSjQcyz84E",
+        authDomain: "order-tracker-51471.firebaseapp.com",
+        projectId: "order-tracker-51471",
+        storageBucket: "order-tracker-51471.firebasestorage.app",
+        messagingSenderId: "761684041108",
+        appId: "1:761684041108:web:5625e43759ed00951a0381",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
 
-    // Simple router for tabs
-    const views = {
-      track: document.getElementById('viewTrack'),
-      add: document.getElementById('viewAdd'),
-      orders: document.getElementById('viewOrders')
-    };
-    let currentEditId = null;
+      // Simple router for tabs
+      const views = {
+        track: document.getElementById("viewTrack"),
+        add: document.getElementById("viewAdd"),
+        orders: document.getElementById("viewOrders"),
+      };
+      let currentEditId = null;
 
-    function showView(name) {
-      Object.values(views).forEach(v => v.style.display = 'none');
-      views[name].style.display = 'block';
-      // update URL hash for shareability
-      location.hash = name;
-    }
-
-    // Init tab buttons
-    document.getElementById('tabTrackBtn').onclick = () => showView('track');
-    document.getElementById('tabAddBtn').onclick = () => { currentEditId = null; document.getElementById('submitBtn').innerText = 'Add Order'; clearForm(); showView('add'); };
-    document.getElementById('tabOrdersBtn').onclick = () => showView('orders');
-
-    // Default route
-    const initial = (location.hash || '#track').replace('#','');
-    if (['track','add','orders'].includes(initial)) showView(initial); else showView('track');
-
-    // If a shared tracking link is opened, auto-fill and trigger tracking
-    function maybeAutoTrack() {
-      const params = new URLSearchParams(location.search);
-      const orderParam = params.get('order');
-      const phoneParam = params.get('phone');
-      if (orderParam || phoneParam) {
-        showView('track');
-        const input = document.getElementById('trackSearch');
-        input.value = (orderParam || phoneParam || '').trim();
-        document.getElementById('trackBtn').click();
-      }
-    }
-    maybeAutoTrack();
-
-    // Track functionality
-    document.getElementById('trackBtn').onclick = () => {
-      const value = document.getElementById('trackSearch').value.trim();
-      const resultDiv = document.getElementById('trackResult');
-      resultDiv.innerHTML = 'Checking...';
-      if (!value) { resultDiv.innerHTML = '⚠ Please enter Order ID or Phone Number'; return; }
-
-      let queryRef;
-      if (value.toUpperCase().startsWith('ORD-')) {
-        queryRef = db.collection('orders').where('orderId', '==', value.toUpperCase());
-      } else {
-        queryRef = db.collection('orders').where('phone', '==', value);
+      function showView(name) {
+        Object.values(views).forEach((v) => (v.style.display = "none"));
+        views[name].style.display = "block";
+        // update URL hash for shareability
+        location.hash = name;
       }
 
-      queryRef.get().then(snapshot => {
-        if (snapshot.empty) { resultDiv.innerHTML = '❌ No order found'; return; }
-        resultDiv.innerHTML = '';
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const itemsHtml = (data.items || []).map(i => `<li>${i.name} × ${i.qty}</li>`).join('');
-          resultDiv.innerHTML += `
+      // Init tab buttons
+      document.getElementById("tabTrackBtn").onclick = () => showView("track");
+      document.getElementById("tabAddBtn").onclick = () => {
+        currentEditId = null;
+        document.getElementById("submitBtn").innerText = "Add Order";
+        clearForm();
+        showView("add");
+      };
+      document.getElementById("tabOrdersBtn").onclick = () =>
+        showView("orders");
+
+      // Default route
+      const initial = (location.hash || "#track").replace("#", "");
+      if (["track", "add", "orders"].includes(initial)) showView(initial);
+      else showView("track");
+
+      // If a shared tracking link is opened, auto-fill and trigger tracking
+      function maybeAutoTrack() {
+        const params = new URLSearchParams(location.search);
+        const orderParam = params.get("order");
+        const phoneParam = params.get("phone");
+        if (orderParam || phoneParam) {
+          showView("track");
+          const input = document.getElementById("trackSearch");
+          input.value = (orderParam || phoneParam || "").trim();
+          document.getElementById("trackBtn").click();
+        }
+      }
+      maybeAutoTrack();
+
+      // Track functionality
+      document.getElementById("trackBtn").onclick = () => {
+        const value = document.getElementById("trackSearch").value.trim();
+        const resultDiv = document.getElementById("trackResult");
+        resultDiv.innerHTML = "Checking...";
+        if (!value) {
+          resultDiv.innerHTML = "⚠ Please enter Order ID or Phone Number";
+          return;
+        }
+
+        let queryRef;
+        if (value.toUpperCase().startsWith("ORD-")) {
+          queryRef = db
+            .collection("orders")
+            .where("orderId", "==", value.toUpperCase());
+        } else {
+          queryRef = db.collection("orders").where("phone", "==", value);
+        }
+
+        queryRef
+          .get()
+          .then((snapshot) => {
+            if (snapshot.empty) {
+              resultDiv.innerHTML = "❌ No order found";
+              return;
+            }
+            resultDiv.innerHTML = "";
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              const itemsHtml = (data.items || [])
+                .map((i) => `<li>${i.name} × ${i.qty}</li>`)
+                .join("");
+              resultDiv.innerHTML += `
             <div class="result">
               <p><strong>Order ID:</strong> ${data.orderId}</p>
               <p><strong>Status:</strong> ${data.status}</p>
@@ -169,209 +209,275 @@
               <ul>${itemsHtml}</ul>
             </div>
           `;
-        });
-      }).catch(err => {
-        console.error(err); resultDiv.innerHTML = err.message;
-      });
-    };
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+            resultDiv.innerHTML = err.message;
+          });
+      };
 
-    // Share tracking link from Track view
-    document.getElementById('trackShareBtn').onclick = () => {
-      const value = document.getElementById('trackSearch').value.trim();
-      const resultDiv = document.getElementById('trackResult');
-      if (!value) { resultDiv.innerHTML = '⚠ Enter an Order ID or Phone to share.'; return; }
-      const isOrder = value.toUpperCase().startsWith('ORD-');
-      const shareUrl = buildTrackUrl(isOrder ? { order: value.toUpperCase() } : { phone: value });
-      const msg = isOrder
-        ? `Track your order ${value.toUpperCase()} here: ${shareUrl}`
-        : `Track orders for phone ${value} here: ${shareUrl}`;
-      openWhatsAppShare(msg);
-    };
-
-    // Add item
-    document.getElementById('addItemBtn').onclick = () => {
-      const wrap = document.getElementById('itemsContainer');
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <input class="item-name" type="text" placeholder="Item Name" />
-        <input class="item-qty" type="number" placeholder="Quantity" min="1" />
-        <input class="item-desc" type="text" placeholder="Description (optional)" />
-      `;
-      wrap.appendChild(row);
-    };
-
-    // Form helpers
-    function clearForm() {
-      document.getElementById('nameInput').value = '';
-      document.getElementById('phoneInput').value = '';
-      const wrap = document.getElementById('itemsContainer');
-      wrap.innerHTML = '';
-      const first = document.createElement('div');
-      first.className = 'item-row';
-      first.innerHTML = `
-        <input class="item-name" type="text" placeholder="Item Name" />
-        <input class="item-qty" type="number" placeholder="Quantity" min="1" />
-        <input class="item-desc" type="text" placeholder="Description (optional)" />
-      `;
-      wrap.appendChild(first);
-      const msg = document.getElementById('formMsg');
-      msg.style.display = 'none';
-      msg.textContent = '';
-      msg.className = 'message mt-16';
-    }
-
-    function showMsg(text, type = 'success') {
-      const msg = document.getElementById('formMsg');
-      msg.textContent = text;
-      msg.className = `message mt-16 ${type === 'success' ? 'success' : (type === 'error' ? 'error' : 'warn')}`;
-      msg.style.display = 'block';
-    }
-
-    // Submit handler
-    document.getElementById('submitBtn').onclick = async () => {
-      const name = document.getElementById('nameInput').value.trim();
-      const phone = document.getElementById('phoneInput').value.trim();
-      const items = Array.from(document.querySelectorAll('#itemsContainer .item-row')).map(row => {
-        const n = row.querySelector('.item-name').value.trim();
-        const q = Number(row.querySelector('.item-qty').value);
-        const d = (row.querySelector('.item-desc')?.value || '').trim();
-        if (!(n && q > 0)) return null;
-        const obj = { name: n, qty: q };
-        if (d) obj.description = d;
-        return obj;
-      }).filter(Boolean);
-
-      if (!name || !phone || items.length === 0) { showMsg('Please fill all required fields', 'error'); return; }
-
-      try {
-        if (currentEditId) {
-          await db.collection('orders').doc(currentEditId).update({ name, phone, items });
-          showMsg('✅ Order updated successfully', 'success');
-          currentEditId = null;
-          document.getElementById('submitBtn').innerText = 'Add Order';
-        } else {
-          const orderId = 'ORD-' + Date.now().toString().slice(-6);
-          await db.collection('orders').add({ orderId, name, phone, items, status: 'Pending', createdAt: new Date() });
-          showMsg(`✅ Order added. Order ID: ${orderId}`, 'success');
+      // Share tracking link from Track view
+      document.getElementById("trackShareBtn").onclick = () => {
+        const value = document.getElementById("trackSearch").value.trim();
+        const resultDiv = document.getElementById("trackResult");
+        if (!value) {
+          resultDiv.innerHTML = "⚠ Enter an Order ID or Phone to share.";
+          return;
         }
-      } catch (err) {
-        console.error(err); showMsg(err.message || 'Something went wrong', 'error');
-      }
-    };
+        const isOrder = value.toUpperCase().startsWith("ORD-");
+        const shareUrl = buildTrackUrl(
+          isOrder ? { order: value.toUpperCase() } : { phone: value }
+        );
+        const msg = isOrder
+          ? `Track your order ${value.toUpperCase()} here: ${shareUrl}`
+          : `Track orders for phone ${value} here: ${shareUrl}`;
+        openWhatsAppShare(msg);
+      };
 
-    // Live orders table
-    const ordersTable = document.getElementById('ordersTable');
-    db.collection('orders').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
-      ordersTable.innerHTML = '';
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const tr = document.createElement('tr');
-        const itemList = (data.items || []).length ? data.items.map(i => `${i.name} (x${i.qty})`).join('<br>') : '<em>No item</em>';
-        tr.innerHTML = `
-          <td>${data.orderId || ''}</td>
-          <td>${data.name || ''}</td>
-          <td>${data.phone || ''}</td>
+      // Add item
+      document.getElementById("addItemBtn").onclick = () => {
+        const wrap = document.getElementById("itemsContainer");
+        const row = document.createElement("div");
+        row.className = "item-row";
+        row.innerHTML = `
+        <input class="item-name" type="text" placeholder="Item Name" />
+        <input class="item-qty" type="number" placeholder="Quantity" min="1" />
+        <input class="item-desc" type="text" placeholder="Description (optional)" />
+      `;
+        wrap.appendChild(row);
+      };
+
+      // Form helpers
+      function clearForm() {
+        document.getElementById("nameInput").value = "";
+        document.getElementById("phoneInput").value = "";
+        const wrap = document.getElementById("itemsContainer");
+        wrap.innerHTML = "";
+        const first = document.createElement("div");
+        first.className = "item-row";
+        first.innerHTML = `
+        <input class="item-name" type="text" placeholder="Item Name" />
+        <input class="item-qty" type="number" placeholder="Quantity" min="1" />
+        <input class="item-desc" type="text" placeholder="Description (optional)" />
+      `;
+        wrap.appendChild(first);
+        const msg = document.getElementById("formMsg");
+        msg.style.display = "none";
+        msg.textContent = "";
+        msg.className = "message mt-16";
+      }
+
+      function showMsg(text, type = "success") {
+        const msg = document.getElementById("formMsg");
+        msg.textContent = text;
+        msg.className = `message mt-16 ${
+          type === "success" ? "success" : type === "error" ? "error" : "warn"
+        }`;
+        msg.style.display = "block";
+      }
+
+      // Submit handler
+      document.getElementById("submitBtn").onclick = async () => {
+        const name = document.getElementById("nameInput").value.trim();
+        const phone = document.getElementById("phoneInput").value.trim();
+        const items = Array.from(
+          document.querySelectorAll("#itemsContainer .item-row")
+        )
+          .map((row) => {
+            const n = row.querySelector(".item-name").value.trim();
+            const q = Number(row.querySelector(".item-qty").value);
+            const d = (row.querySelector(".item-desc")?.value || "").trim();
+            if (!(n && q > 0)) return null;
+            const obj = { name: n, qty: q };
+            if (d) obj.description = d;
+            return obj;
+          })
+          .filter(Boolean);
+
+        if (!name || !phone || items.length === 0) {
+          showMsg("Please fill all required fields", "error");
+          return;
+        }
+
+        try {
+          if (currentEditId) {
+            await db
+              .collection("orders")
+              .doc(currentEditId)
+              .update({ name, phone, items });
+            showMsg("✅ Order updated successfully", "success");
+            currentEditId = null;
+            document.getElementById("submitBtn").innerText = "Add Order";
+          } else {
+            const orderId = "ORD-" + Date.now().toString().slice(-6);
+            await db.collection("orders").add({
+              orderId,
+              name,
+              phone,
+              items,
+              status: "Pending",
+              createdAt: new Date(),
+            });
+            showMsg(`✅ Order added. Order ID: ${orderId}`, "success");
+          }
+        } catch (err) {
+          console.error(err);
+          showMsg(err.message || "Something went wrong", "error");
+        }
+      };
+
+      // Live orders table
+      const ordersTable = document.getElementById("ordersTable");
+      db.collection("orders")
+        .orderBy("createdAt", "desc")
+        .onSnapshot((snapshot) => {
+          ordersTable.innerHTML = "";
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const tr = document.createElement("tr");
+            const itemList = (data.items || []).length
+              ? data.items.map((i) => `${i.name} (x${i.qty})`).join("<br>")
+              : "<em>No item</em>";
+            tr.innerHTML = `
+          <td>${data.orderId || ""}</td>
+          <td>${data.name || ""}</td>
+          <td>${data.phone || ""}</td>
           <td>${itemList}</td>
           <td>
             <select data-id="${doc.id}" class="status-select">
-              <option ${data.status === 'Pending' ? 'selected' : ''}>Pending</option>
-              <option ${data.status === 'Processing' ? 'selected' : ''}>Processing</option>
-              <option ${data.status === 'Ready' ? 'selected' : ''}>Ready</option>
-              <option ${data.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+              <option ${
+                data.status === "Pending" ? "selected" : ""
+              }>Pending</option>
+              <option ${
+                data.status === "Processing" ? "selected" : ""
+              }>Processing</option>
+              <option ${
+                data.status === "Ready" ? "selected" : ""
+              }>Ready</option>
+              <option ${
+                data.status === "Delivered" ? "selected" : ""
+              }>Delivered</option>
             </select>
           </td>
           <td class="actions">
-            <button class="ghost" data-action="edit" data-id="${doc.id}">Edit</button>
-            <button class="ghost" data-action="share" data-id="${doc.id}">Share</button>
+            <button class="ghost" data-action="edit" data-id="${
+              doc.id
+            }">Edit</button>
+            <button class="ghost" data-action="share" data-id="${
+              doc.id
+            }">Share</button>
             <button data-action="print" data-id="${doc.id}">Print</button>
           </td>
         `;
-        ordersTable.appendChild(tr);
-      });
-    });
-
-    // Delegate status changes and actions
-    document.addEventListener('change', async (e) => {
-      if (e.target && e.target.classList.contains('status-select')) {
-        const id = e.target.getAttribute('data-id');
-        await db.collection('orders').doc(id).update({ status: e.target.value });
-      }
-    });
-
-    document.addEventListener('click', async (e) => {
-      const t = e.target;
-      if (t && t.getAttribute('data-action') === 'edit') {
-        const id = t.getAttribute('data-id');
-        const snap = await db.collection('orders').doc(id).get();
-        const d = snap.data() || {};
-        currentEditId = id;
-        document.getElementById('nameInput').value = d.name || '';
-        document.getElementById('phoneInput').value = d.phone || '';
-        const wrap = document.getElementById('itemsContainer');
-        wrap.innerHTML = '';
-        (d.items || []).forEach(item => {
-          const row = document.createElement('div');
-          row.className = 'item-row';
-          row.innerHTML = `
-            <input class="item-name" type="text" placeholder="Item Name" value="${item.name}" />
-            <input class="item-qty" type="number" placeholder="Quantity" min="1" value="${item.qty}" />
-            <input class="item-desc" type="text" placeholder="Description (optional)" value="${(item.description || '').replace(/"/g,'&quot;')}">
-          `;
-          wrap.appendChild(row);
+            ordersTable.appendChild(tr);
+          });
         });
-        document.getElementById('submitBtn').innerText = 'Update Order';
-        showView('add');
+
+      // Delegate status changes and actions
+      document.addEventListener("change", async (e) => {
+        if (e.target && e.target.classList.contains("status-select")) {
+          const id = e.target.getAttribute("data-id");
+          await db
+            .collection("orders")
+            .doc(id)
+            .update({ status: e.target.value });
+        }
+      });
+
+      document.addEventListener("click", async (e) => {
+        const t = e.target;
+        if (t && t.getAttribute("data-action") === "edit") {
+          const id = t.getAttribute("data-id");
+          const snap = await db.collection("orders").doc(id).get();
+          const d = snap.data() || {};
+          currentEditId = id;
+          document.getElementById("nameInput").value = d.name || "";
+          document.getElementById("phoneInput").value = d.phone || "";
+          const wrap = document.getElementById("itemsContainer");
+          wrap.innerHTML = "";
+          (d.items || []).forEach((item) => {
+            const row = document.createElement("div");
+            row.className = "item-row";
+            row.innerHTML = `
+            <input class="item-name" type="text" placeholder="Item Name" value="${
+              item.name
+            }" />
+            <input class="item-qty" type="number" placeholder="Quantity" min="1" value="${
+              item.qty
+            }" />
+            <input class="item-desc" type="text" placeholder="Description (optional)" value="${(
+              item.description || ""
+            ).replace(/"/g, "&quot;")}">
+          `;
+            wrap.appendChild(row);
+          });
+          document.getElementById("submitBtn").innerText = "Update Order";
+          showView("add");
+        }
+
+        if (t && t.getAttribute("data-action") === "share") {
+          const id = t.getAttribute("data-id");
+          const snap = await db.collection("orders").doc(id).get();
+          const d = snap.data() || {};
+          const orderId = d.orderId || "";
+          if (!orderId) return;
+          const shareUrl = buildTrackUrl({ order: orderId });
+          const msg = `Track your order ${orderId} here: ${shareUrl}`;
+          openWhatsAppShare(msg);
+        }
+
+        if (t && t.getAttribute("data-action") === "print") {
+          const id = t.getAttribute("data-id");
+          printOrder(id);
+        }
+      });
+
+      // Helpers for sharing
+      function buildTrackUrl({ order, phone }) {
+        const url = new URL(window.location.href);
+        url.search = "";
+        // point to this simple app
+        url.pathname = url.pathname.replace(/[^\/]*$/, "simple-app.html");
+        const params = new URLSearchParams();
+        if (order) params.set("order", String(order));
+        if (phone) params.set("phone", String(phone));
+        url.search = params.toString();
+        url.hash = "track";
+        return url.toString();
+      }
+      function openWhatsAppShare(text) {
+        const wa = "https://wa.me/?text=" + encodeURIComponent(text);
+        window.open(wa, "_blank");
       }
 
-      if (t && t.getAttribute('data-action') === 'share') {
-        const id = t.getAttribute('data-id');
-        const snap = await db.collection('orders').doc(id).get();
-        const d = snap.data() || {};
-        const orderId = d.orderId || '';
-        if (!orderId) return;
-        const shareUrl = buildTrackUrl({ order: orderId });
-        const msg = `Track your order ${orderId} here: ${shareUrl}`;
-        openWhatsAppShare(msg);
-      }
-
-      if (t && t.getAttribute('data-action') === 'print') {
-        const id = t.getAttribute('data-id');
-        printOrder(id);
-      }
-    });
-
-    // Helpers for sharing
-    function buildTrackUrl({ order, phone }) {
-      const url = new URL(window.location.href);
-      url.search = '';
-      // point to this simple app
-      url.pathname = url.pathname.replace(/[^\/]*$/, 'simple-app.html');
-      const params = new URLSearchParams();
-      if (order) params.set('order', String(order));
-      if (phone) params.set('phone', String(phone));
-      url.search = params.toString();
-      url.hash = 'track';
-      return url.toString();
-    }
-    function openWhatsAppShare(text) {
-      const wa = 'https://wa.me/?text=' + encodeURIComponent(text);
-      window.open(wa, '_blank');
-    }
-
-    // Print with UI styling
-    async function printOrder(orderId) {
-      const docSnap = await db.collection('orders').doc(orderId).get();
-      const d = docSnap.data() || {};
-      const items = (d.items || []).map(i => `<li><div class="line"><span>${i.name}</span><span>x${i.qty}</span></div>${i.description ? `<div class=\"desc\">${i.description}</div>` : ''}</li>`).join('');
-      const win = window.open('', '', 'width=480,height=700');
-      const now = new Date();
-      const cssHref = location.origin + location.pathname.replace(/\\[^\\/]*$/, '') + '/index.css';
-      const html = `<!doctype html>
+      // Print with UI styling
+      async function printOrder(orderId) {
+        const docSnap = await db.collection("orders").doc(orderId).get();
+        const d = docSnap.data() || {};
+        const items = (d.items || [])
+          .map(
+            (i) =>
+              `<li><div class="line"><span>${i.name}</span><span>x${
+                i.qty
+              }</span></div>${
+                i.description
+                  ? `<div class=\"desc\">${i.description}</div>`
+                  : ""
+              }</li>`
+          )
+          .join("");
+        const win = window.open("", "", "width=480,height=700");
+        const now = new Date();
+        const cssHref =
+          location.origin +
+          location.pathname.replace(/\\[^\\/]*$/, "") +
+          "/index.css";
+        const html = `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Order Slip - ${d.orderId || ''}</title>
+  <title>Order Slip - ${d.orderId || ""}</title>
   <link rel="stylesheet" href="${cssHref}" />
   <style>
     @page { margin: 8mm; }
@@ -404,10 +510,10 @@
       </div>
       <hr class="divider" />
       <div class="kv">
-        <div class="label">Order ID</div><div>${d.orderId || ''}</div>
-        <div class="label">Name</div><div>${d.name || ''}</div>
-        <div class="label">Phone</div><div>${d.phone || ''}</div>
-        <div class="label">Status</div><div>${d.status || ''}</div>
+        <div class="label">Order ID</div><div>${d.orderId || ""}</div>
+        <div class="label">Name</div><div>${d.name || ""}</div>
+        <div class="label">Phone</div><div>${d.phone || ""}</div>
+        <div class="label">Status</div><div>${d.status || ""}</div>
       </div>
       <div class="items">
         <h3 style="margin:8px 0 6px; font-size:14px;">Items</h3>
@@ -420,10 +526,10 @@
   <script>setTimeout(function(){ window.print(); }, 50);<\/script>
 </body>
 </html>`;
-      win.document.open();
-      win.document.write(html);
-      win.document.close();
-    }
-  </script>
-</body>
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+      }
+    </script>
+  </body>
 </html>
