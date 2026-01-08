@@ -6,6 +6,7 @@ function addItem() {
   row.innerHTML = `
         <input class ="item-name" placeholder = "Item Name">
         <input class ="item-qty" type ="number" placeholder = "Quantity">
+        <input class="item-desc" type="text" placeholder="Description (optional)" />
         `;
 
   itemsDiv.appendChild(row);
