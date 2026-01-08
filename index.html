@@ -30,14 +30,28 @@
           <div id="items">
             <div class="item-row">
               <input class="item-name" type="text" placeholder="Item Name" />
-              <input class="item-qty" type="number" placeholder="Quantity" min="1" />
-              <input class="item-desc" type="text" placeholder="Description (optional)" />
+              <input
+                class="item-qty"
+                type="number"
+                placeholder="Quantity"
+                min="1"
+              />
+              <input
+                class="item-desc"
+                type="text"
+                placeholder="Description (optional)"
+              />
             </div>
           </div>
           <div class="mt-16">
-            <button type="button" class="ghost mr-8" onclick="addItem()">➕ Add another item</button>
+            <button type="button" class="ghost mr-8" onclick="addItem()">
+              ➕ Add another item
+            </button>
             <button id="submitBtn" onclick="addOrder()">Add Order</button>
-                      </div>
+            <button class="btn">
+              <a href="track-order.html">Track Order</a>
+            </button>
+          </div>
           <p id="message" class="message mt-16"></p>
         </div>
       </div>
@@ -69,5 +83,5 @@
 
     <script src="js/addorder.js"></script>
     <script src="js/addItem.js"></script>
-      </body>
+  </body>
 </html>
